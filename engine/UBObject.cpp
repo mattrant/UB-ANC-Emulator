@@ -11,7 +11,12 @@
 
 #include "LinkManager.h"
 #include "LinkManagerFactory.h"
-
+/**
+ * @brief UBObject::UBObject
+ * Instantiates all the servers used for the various parts of the drone. The actual configurations of all these
+ * servers is done through the use of getter functions
+ * @param parent
+ */
 UBObject::UBObject(QObject *parent) : QObject(parent),
     m_uav(NULL),
     m_cr(0),
@@ -52,7 +57,11 @@ void UBObject::setAgent(const QString& path, const QStringList& args) {
     m_agent->setProgram(QString(AGENT_FILE));
     m_agent->setArguments(args);
 }
-
+/**
+ * @brief UBObject::startObject
+ * Starts all of the servers associated with the MAV Object
+ * @param port
+ */
 void UBObject::startObject(int port) {
     m_port = port;
 
@@ -79,7 +88,8 @@ void UBObject::disconnectedEvent() {
         m_timer->start();
     } else {
         m_port += 2;
-
+        //needed so that stdout/stderr will print to parent stdout/stderr
+        m_agent->setProcessChannelMode(QProcess::ForwardedChannels);
         m_agent->start();
         m_socket->connectToHost(QHostAddress::LocalHost, m_port);
     }
@@ -97,4 +107,13 @@ void UBObject::netClientConnectedEvent(quint16 port) {
 
 void UBObject::snrClientConnectedEvent(quint16 port) {
     QLOG_INFO() << "SNR Connected | Port: " << port;
+}
+
+/**
+ * @brief UBObject::killUAV
+ * Simulates immediate failure of a uav
+ */
+void UBObject::killUAV(){
+    m_agent->kill();
+    m_firmware->kill();
 }

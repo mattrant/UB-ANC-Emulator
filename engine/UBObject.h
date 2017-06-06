@@ -75,6 +75,7 @@ public:
 
     quint32 getCR(void) {return m_cr;}
     quint32 getVR(void) {return m_vr;}
+    void killUAV();
 };
 
 #endif // UBOBJECT_H
