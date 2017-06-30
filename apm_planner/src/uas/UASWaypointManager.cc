@@ -858,6 +858,7 @@ void UASWaypointManager::goToWaypoint(Waypoint *wp)
     if (uas->getAutopilotType() == MAV_AUTOPILOT_ARDUPILOTMEGA)
     {
         QLOG_DEBUG() << "APM: goToWaypont: " + wp->debugString();
+        QLOG_INFO()<<"Emitting signal...";
         mavlink_mission_item_t mission;
         memset(&mission, 0, sizeof(mavlink_mission_item_t));   //initialize with zeros
         //const Waypoint *cur_s = waypointsEditable.at(i);
@@ -879,6 +880,8 @@ void UASWaypointManager::goToWaypoint(Waypoint *wp)
         mission.target_component = MAV_COMP_ID_MISSIONPLANNER;
         mavlink_msg_mission_item_encode(uas->getSystemId(), uas->getComponentId(), &message, &mission);
         uas->sendMessage(message);
+
+        emit goToWaypointCalled(wp);
         QGC::SLEEP::msleep(PROTOCOL_DELAY_MS);
     }
 }

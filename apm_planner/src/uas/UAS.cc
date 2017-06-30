@@ -34,6 +34,8 @@
 #include <google/protobuf/descriptor.h>
 #endif
 
+using namespace std;
+
 
 const double UAS::lipoFull = 4.2f;  ///< 100% charged voltage
 const double UAS::lipoEmpty = 3.5f; ///< Discharged voltage
@@ -3127,6 +3129,7 @@ void UAS::home()
 */
 void UAS::land()
 {
+
     mavlink_message_t msg;
 
     mavlink_msg_command_long_pack(systemId, componentId, &msg, uasId, MAV_COMP_ID_PRIMARY, MAV_CMD_NAV_LAND, 1, 0, 0, 0, 0, 0, 0, 0);

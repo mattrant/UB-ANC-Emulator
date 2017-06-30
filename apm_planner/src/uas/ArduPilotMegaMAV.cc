@@ -550,7 +550,7 @@ void ArduPilotMegaMAV::playCustomModeChangedAudioMessage()
 {
     QString phrase;
 
-    phrase = "Mode changed to " + getCustomModeText() + " for system " + QString::number(getUASID());
+    phrase = "Mode changed to " + getCustomModeText() + +"("+custom_mode+")"+" for system " + QString::number(getUASID());
     QLOG_DEBUG() << "APM say:" << phrase;
 //    GAudioOutput::instance()->say(phrase.toLower());
 }

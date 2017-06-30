@@ -33,6 +33,7 @@ This file is part of the QGROUNDCONTROL project
 #include "Waypoint.h"
 #include <QStringList>
 
+using namespace std;
 
 Waypoint::Waypoint(quint16 _id, double _x, double _y, double _z, double _param1, double _param2, double _param3, double _param4,
                    bool _autocontinue, bool _current, MAV_FRAME _frame, MAV_CMD _action, const QString& _description)

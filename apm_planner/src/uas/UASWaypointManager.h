@@ -167,7 +167,7 @@ signals:
 
     void loadWPFile();                              ///< emits signal that a file wp has been load
     void readGlobalWPFromUAS(bool value);           ///< emits signal when finish to read Global WP from UAS
-
+    void goToWaypointCalled(Waypoint* wp);
 private:
     UAS* uas;                                       ///< Reference to the corresponding UAS
     quint32 current_retries;                        ///< The current number of retries left

@@ -47,6 +47,8 @@ This file is part of the QGROUNDCONTROL project
 #include "UAS.h"
 #include "UASManager.h"
 
+using namespace std;
+
 QGCFlightGearLink::QGCFlightGearLink(UASInterface* mav, QString startupArguments, QString remoteHost, QHostAddress host, quint16 port) :
     socket(NULL),
     process(NULL),

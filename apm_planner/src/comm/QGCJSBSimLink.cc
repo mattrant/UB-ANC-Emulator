@@ -43,6 +43,8 @@ This file is part of the QGROUNDCONTROL project
 
 #include "UAS.h"
 
+using namespace std;
+
 QGCJSBSimLink::QGCJSBSimLink(UASInterface* mav, QString startupArguments, QString remoteHost, QHostAddress host, quint16 port) :
     socket(NULL),
     process(NULL),
