@@ -11,6 +11,8 @@
 
 #include "LinkManager.h"
 #include "LinkManagerFactory.h"
+#include "ArduPilotMegaMAV.h"
+#include "unistd.h"
 /**
  * @brief UBObject::UBObject
  * Instantiates all the servers used for the various parts of the drone. The actual configurations of all these
@@ -23,6 +25,7 @@ UBObject::UBObject(QObject *parent, int id) : QObject(parent),
     m_vr(0)
 {
     m_id = id;
+
     m_firmware = new QProcess(this);
     m_agent = new QProcess(this);
 
@@ -119,5 +122,15 @@ void UBObject::snrClientConnectedEvent(quint16 port) {
 void UBObject::killUAV(){
     m_agent->kill();
     m_firmware->kill();
+}
+
+void UBObject::setUAV(UASInterface *uav){
+    ArduPilotMegaMAV* _uav = qobject_cast<ArduPilotMegaMAV*>(uav);
+    while(_uav->getUASID()!=m_id){
+        _uav->setParameter(1,"SYSID_THISMAV",m_id);
+        sleep(1);
+
+    }
+     QLOG_INFO()<<"***Changing ID to "<<m_id <<"| Actual: "<<_uav->getUASID();
 }
 

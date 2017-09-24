@@ -57,7 +57,7 @@ protected slots:
     void errorEvent(QAbstractSocket::SocketError err);
 
 public slots:
-    void setUAV(UASInterface* uav) {m_uav = uav;}
+    void setUAV(UASInterface* uav);
 
     void setCR(quint32 cr) {m_cr = cr;}
     void setVR(quint32 vr) {m_vr = vr;}
