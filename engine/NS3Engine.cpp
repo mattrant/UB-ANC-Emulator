@@ -32,7 +32,10 @@ void NS3Engine::startEngine(QVector<UBObject*>* objs) {
     QFuture<void> ns3 = QtConcurrent::run(this, &NS3Engine::startNS3);
 //    ns3.waitForFinished();
 }
-
+/**
+ * @brief NS3Engine::startNS3 Initializes and starts the NS3 discrete event simulator. Any changes to the configuration of the NS3 simulator should
+ * be made inside of this function
+ */
 void NS3Engine::startNS3() {
     GlobalValue::Bind("SimulatorImplementationType", StringValue("ns3::RealtimeSimulatorImpl"));
     GlobalValue::Bind("ChecksumEnabled", BooleanValue(true));
@@ -165,6 +168,12 @@ void NS3Engine::receivePacket(Ptr<Socket> socket) {
         }
     }
 }
+/**
+ * @brief NS3Engine::networkEvent
+ * Slot will run anytime an event occurs in the network. The event will be scheduled within the NS3 simulation engine
+ * @param obj
+ * @param data
+ */
 
 void NS3Engine::networkEvent(UBObject* obj, const QByteArray& data) {
     static QVector<QByteArray> vdata(m_objs->size());

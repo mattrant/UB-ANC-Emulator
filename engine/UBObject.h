@@ -19,8 +19,8 @@ class UBObject : public QObject
 {
     Q_OBJECT
 public:
-    explicit UBObject(QObject *parent = 0);
-
+    explicit UBObject(QObject *parent = 0,int id=1);
+    quint8 m_id;
 protected:
     UASInterface* m_uav;
 
@@ -75,6 +75,7 @@ public:
 
     quint32 getCR(void) {return m_cr;}
     quint32 getVR(void) {return m_vr;}
+    void setID(quint8 id){m_id = id;}
     void killUAV();
 };
 

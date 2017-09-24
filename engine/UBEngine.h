@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <mutex>
 
 class QTimer;
 
@@ -16,6 +17,7 @@ class UBEngine : public QObject
     Q_OBJECT
 public:
     explicit UBEngine(QObject *parent = 0);
+    void removeFromSwarm(int uav_id);
 
 protected:
     QTimer* m_timer;
@@ -38,6 +40,8 @@ protected slots:
 
 protected:
     double distance(double lat1, double lon1, double alt1, double lat2, double lon2, double alt2);
+private:
+    std::mutex instance_lock;
 };
 
 #endif // UBENGINE_H

@@ -17,11 +17,12 @@
  * servers is done through the use of getter functions
  * @param parent
  */
-UBObject::UBObject(QObject *parent) : QObject(parent),
+UBObject::UBObject(QObject *parent, int id) : QObject(parent),
     m_uav(NULL),
     m_cr(0),
     m_vr(0)
 {
+    m_id = id;
     m_firmware = new QProcess(this);
     m_agent = new QProcess(this);
 
@@ -72,7 +73,9 @@ void UBObject::startObject(int port) {
 
     m_socket->connectToHost(QHostAddress::LocalHost, m_port);
 }
-
+/**
+ * @brief UBObject::objectTracker This function is called every OBJECT_TRACK_RATE milliseconds.
+ */
 void UBObject::objectTracker() {
 }
 
@@ -111,9 +114,10 @@ void UBObject::snrClientConnectedEvent(quint16 port) {
 
 /**
  * @brief UBObject::killUAV
- * Simulates immediate failure of a uav
+ * Simulates immediate failure of a uav. The processess responsible for the autopilot and agent will be killed.
  */
 void UBObject::killUAV(){
     m_agent->kill();
     m_firmware->kill();
 }
+

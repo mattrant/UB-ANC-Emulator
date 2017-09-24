@@ -39,4 +39,6 @@
 #define MISSION_START_DELAY 10000
 #define MISSION_TRACK_RATE 1000
 
+#define NUM_TASKS 10
+
 #endif // CONFIG_H
