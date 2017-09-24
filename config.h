@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define COMM_RANGE 50
+#define COMM_RANGE 100
 #define VISUAL_RANGE 10
 
 #define MAV_PORT  5760
