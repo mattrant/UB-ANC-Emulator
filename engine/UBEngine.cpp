@@ -128,45 +128,45 @@ void UBEngine::startEngine() {
         connect(obj, SIGNAL(netDataReady(UBObject*,QByteArray)), m_ns3, SLOT(networkEvent(UBObject*,QByteArray)));
 
         //generating random location for home for UAVs to test
-//        double base_lat = 43.000755; //field near UB North
-//        double base_lon = -78.776023;
+        double base_lat = 43.000755; //field near UB North
+        double base_lon = -78.776023;
 
-//        int rand_dist = qrand()%50;
-//        double rand_angle = qrand()%361;
-//        rand_angle = qDegreesToRadians((double)rand_angle);
+        int rand_dist = qrand()%50;
+        double rand_angle = qrand()%361;
+        rand_angle = qDegreesToRadians((double)rand_angle);
 
-//        projections::MercatorProjection proj;
-//        core::Point pix1 = proj.FromLatLngToPixel(base_lat, base_lon, GND_RES);
+        projections::MercatorProjection proj;
+        core::Point pix1 = proj.FromLatLngToPixel(base_lat, base_lon, GND_RES);
 
-//        Vector3d v1(pix1.X(), pix1.Y(), 0);
-//        Vector3d v2(rand_dist*qCos(rand_angle),rand_dist*qSin(rand_angle),0);
+        Vector3d v1(pix1.X(), pix1.Y(), 0);
+        Vector3d v2(rand_dist*qCos(rand_angle),rand_dist*qSin(rand_angle),0);
 
-//        Vector3d v = v1+v2;
+        Vector3d v = v1+v2;
 
-//        internals::PointLatLng pll = proj.FromPixelToLatLng(v.x(), v.y(), GND_RES);
+        internals::PointLatLng pll = proj.FromPixelToLatLng(v.x(), v.y(), GND_RES);
 
-//        double lat = pll.Lat();
-//        double lon = pll.Lng();
-//        double lat =base_lat;
-//        double lon = base_lon;
+        double lat = pll.Lat();
+        double lon = pll.Lng();
+       // double lat =base_lat;
+       // double lon = base_lon;
 
-        double lat;
-        double lon;
+//        double lat;
+//      double lon;
 
-        switch(_instance){
-            case 0:
-                lat = 43.0089759949898891;
-                lon = -78.7899863719940186;
-                break;
-            case 1:
-                lat = 43.0088740043467226;
-                lon = -78.7898388504981995;
-                break;
-            case 2:
-                lat = 43.0087720135341982;
-                lon = -78.7899944186210632;
-                break;
-        }
+//        switch(_instance){
+//            case 0:
+//                lat = 43.0089759949898891;
+//                lon = -78.7899863719940186;
+//                break;
+//            case 1:
+//                lat = 43.0088740043467226;
+//               lon = -78.7898388504981995;
+//                break;
+//            case 2:
+//                lat = 43.0087720135341982;
+//                lon = -78.7899944186210632;
+//                break;
+//        }
 
         UASWaypointManager wpm;
         wpm.loadWaypoints(QString(OBJECTS_PATH) + QString("/") + folder + QString(MISSION_FILE));
