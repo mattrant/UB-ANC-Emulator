@@ -207,7 +207,7 @@ void UBEngine::startEngine() {
  */
 void UBEngine::uavAddedEvent(UASInterface* uav) {
     if (!uav)
-        return;    
+        return;
 
 
     connect(uav, SIGNAL(globalPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(positionChangeEvent(UASInterface*)));

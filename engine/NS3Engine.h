@@ -18,7 +18,7 @@ public:
 
     void startEngine(QVector<UBObject*> *objs);
     void startNS3();
-    void receivePacket(ns3::Ptr<ns3::Socket> socket);
+    void receivePacket(ns3::Ptr<const ns3::Packet> p, const ns3::Address& from);
     void bringDownNode(UASInterface* uav);
 
 signals:

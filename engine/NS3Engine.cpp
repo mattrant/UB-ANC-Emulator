@@ -13,6 +13,7 @@
 #include "ns3/internet-module.h"
 #include "ns3/olsr-module.h"
 #include "ns3/aodv-module.h"
+#include "ns3/applications-module.h"
 
 using namespace ns3;
 
@@ -113,15 +114,18 @@ void NS3Engine::startNS3() {
     Ipv4InterfaceContainer i = ipv4.Assign(devices);
 
     InetSocketAddress local = InetSocketAddress(Ipv4Address::GetAny(), PXY_PORT);
-    for (int i = 0; i < m_objs->size(); i++) {
-        Ptr<Socket> socket = Socket::CreateSocket(m_nodes.Get(i), UdpSocketFactory::GetTypeId());
-        socket->SetAllowBroadcast(true);
-        socket->Bind(local);
-        socket->SetRecvCallback(MakeCallback(&NS3Engine::receivePacket, this));
+    uint16_t sinkPort = 8080;
+    for (Ipv4InterfaceContainer::Iterator it = i.Begin(); it != i.End(); ++it) {
+          Ptr<Node> node = it->first->GetNetDevice(it->second)->GetNode();
+          //UBObject* obj = m_nods->value(GetPointer(node));
+          Ipv4Address addr = it->first->GetAddress(it->second, 0).GetLocal();
 
-        m_nodes.Get(i)->AggregateObject(socket);
+          PacketSinkHelper packetSinkHelper ("ns3::TcpSocketFactory",InetSocketAddress(addr,sinkPort));
+          ApplicationContainer sinkApps = packetSinkHelper.Install(node);
+          sinkApps.Start(Seconds(0.));
+          sinkApps.Get(0)->TraceConnectWithoutContext("Rx",MakeCallback(&NS3Engine::receivePacket,this));
+
     }
-
     if (tracing == true) {
         AsciiTraceHelper ascii;
         wifiPhy.EnableAsciiAll(ascii.CreateFileStream("wifi-adhoc.tr"));
@@ -144,39 +148,44 @@ void NS3Engine::startNS3() {
     Simulator::Destroy();
 }
 
-void NS3Engine::receivePacket(Ptr<Socket> socket) {
-    uint32_t index = -1;
-    for (int i = 0; i < m_objs->size(); i++) {
-        if (m_nodes.Get(i)->GetObject<Socket>() == socket) {
-            index = i;
-            break;
-        }
+void NS3Engine::receivePacket(Ptr<const Packet> p,const Address& from) {
+
+
+    //extract destination info to determine object to receive packet
+    QByteArray info(p->GetSize(), 0);
+    p->CopyData((uint8_t*)info.data(), p->GetSize());
+    UBNetPacket ubp;
+    ubp.depacketize(info);
+
+
+    quint8 possible = 3;
+    //std::cout<<"Received by "<<QString::number(ubp.getDesID()).toStdString()<<std::endl;
+    for(int i =0;i<m_objs->size();++i){
+      if(m_objs->at(i)->m_id==ubp.getDesID()){
+        QMetaObject::invokeMethod(m_objs->at(i), "netSendData", Qt::QueuedConnection, Q_ARG(const QByteArray&, info));
+        break;
+      }
     }
 
-    if (index == -1)
-        return;
 
-    Ptr<Packet> packet;
-    Address from;
-    while ((packet = socket->RecvFrom(from))) {
-        if (InetSocketAddress::IsMatchingType(from)) {
-//            std::cout << "At time " << Simulator::Now ().GetSeconds () << "s client received " << packet->GetSize () << " bytes from " <<
-//                         InetSocketAddress::ConvertFrom (from).GetIpv4 () << " port " <<
-//                         InetSocketAddress::ConvertFrom (from).GetPort () << std::endl;
 
-            QByteArray data(packet->GetSize(), 0);
-            packet->CopyData((uint8_t*)data.data(), packet->GetSize());
-            QMetaObject::invokeMethod(m_objs->at(index), "netSendData", Qt::QueuedConnection, Q_ARG(const QByteArray&, data));
-        }
-    }
+
+
+
+
+
+
+
+
+
 }
+
 /**
  * @brief NS3Engine::networkEvent
- * Slot will run anytime an event occurs in the network. The event will be scheduled within the NS3 simulation engine
+ * Slot will run anytime an agent wishes to send information across the network. The event will be scheduled within the NS3 simulation engine
  * @param obj
  * @param data
  */
-
 void NS3Engine::networkEvent(UBObject* obj, const QByteArray& data) {
     static QVector<QByteArray> vdata(m_objs->size());
 
@@ -185,7 +194,6 @@ void NS3Engine::networkEvent(UBObject* obj, const QByteArray& data) {
         return;
 
     vdata[index] += data;
-   // std::cout<<"Network Event..."<<std::endl;
 
     while (vdata[index].contains(PACKET_END)) {
         int bytes = vdata[index].indexOf(PACKET_END);
@@ -193,21 +201,53 @@ void NS3Engine::networkEvent(UBObject* obj, const QByteArray& data) {
         UBNetPacket packet;
         packet.depacketize(vdata[index].left(bytes));
 
-        Ptr<Socket> socket = m_nodes.Get(index)->GetObject<Socket>();
-        InetSocketAddress remote = InetSocketAddress(Ipv4Address(tr("10.1.1.%1").arg(packet.getDesID()).toStdString().c_str()), PXY_PORT);
-//        InetSocketAddress remote = InetSocketAddress(Ipv4Address("255.255.255.255"), PXY_PORT);
+        if(packet.getDesID()==255){
 
-        QByteArray pkt = packet.packetize().append(PACKET_END);
+            for(int i =0;i<m_objs->size();++i){
+                //skip sending it to sender
+                if(m_objs->at(i)->m_id == obj->m_id){
+                    continue;
+                }
 
-//        Simulator::ScheduleWithContext(m_nodes.Get(index)->GetId(), Time(0), &Socket::SendTo, socket, (uint8_t*)pkt.data(), pkt.size(), 0, remote);
-        Simulator::ScheduleWithContext(m_nodes.Get(index)->GetId(), Time(0), &NS3Engine::sendData, this, socket, remote, pkt);
+                packet.m_desID = m_objs->at(i)->m_id;
+                InetSocketAddress remote = InetSocketAddress(Ipv4Address(tr("10.1.1.%1").arg(packet.getDesID()).toStdString().c_str()), 8080);
+            //        InetSocketAddress remote = InetSocketAddress(Ipv4Address("255.255.255.255"), PXY_PORT);
+
+                QByteArray pkt = packet.packetize().append(PACKET_END);
+                //std::cout<<QString::number(packet.getDesID()).toStdString()<< " "<<QString::number(packet.getSrcID()).toStdString()<<"Contents: " <<pkt.toHex().toStdString().c_str()<<std::endl;
+
+            //        Simulator::ScheduleWithContext(m_nodes.Get(index)->GetId(), Time(0), &Socket::SendTo, socket, (uint8_t*)pkt.data(), pkt.size(), 0, remote);
+                Ptr<Socket> socket = ns3::Socket::CreateSocket(m_nodes.Get(index),ns3::TcpSocketFactory::GetTypeId());
+                Simulator::ScheduleWithContext(m_nodes.Get(index)->GetId(), Time(0), &NS3Engine::sendData, this, socket, remote, pkt);
+            }
+        }
+        else{
+            InetSocketAddress remote = InetSocketAddress(Ipv4Address(tr("10.1.1.%1").arg(packet.getDesID()).toStdString().c_str()), 8080);
+        //        InetSocketAddress remote = InetSocketAddress(Ipv4Address("255.255.255.255"), PXY_PORT);
+
+            QByteArray pkt = packet.packetize().append(PACKET_END);
+
+        //        Simulator::ScheduleWithContext(m_nodes.Get(index)->GetId(), Time(0), &Socket::SendTo, socket, (uint8_t*)pkt.data(), pkt.size(), 0, remote);
+            Ptr<Socket> socket = ns3::Socket::CreateSocket(m_nodes.Get(index),ns3::TcpSocketFactory::GetTypeId());
+            Simulator::ScheduleWithContext(m_nodes.Get(index)->GetId(), Time(0), &NS3Engine::sendData, this, socket, remote, pkt);
+        }
 
         vdata[index] = vdata[index].mid(bytes + qstrlen(PACKET_END));
     }
 }
 
+
+
+
+
 void NS3Engine::sendData(Ptr<Socket> socket, const Address& remote, const QByteArray& packet) {
-    socket->SendTo((uint8_t*)packet.data(), packet.size(), 0, remote);
+    socket->Bind();
+
+    if(socket->Connect(remote)==0){
+      //std::cout<<"Successfully connected to "<<remote<<std::endl;
+      socket->Send((uint8_t*)packet.data(), packet.size(), 0);
+    }
+    socket->Close();
 }
 
 void NS3Engine::positionChangeEvent(UASInterface* uav) {
