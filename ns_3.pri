@@ -1,4 +1,4 @@
-NS3ROOT = /home/jalil/workspace/ns-allinone-3.26/ns-3.26/build
+NS3ROOT= /home/mcsl/Downloads/ns-allinone-3.26/ns-3.26/build
 
 LIBS += -lns3.26-core-debug \
     -lns3.26-network-debug \
@@ -7,6 +7,7 @@ LIBS += -lns3.26-core-debug \
     -lns3.26-mobility-debug \
     -lns3.26-olsr-debug \
     -lns3.26-aodv-debug \
+    -lns3.26-applications-debug\
     -L$${NS3ROOT} \
     -Wl,-rpath,$${NS3ROOT} \
 
